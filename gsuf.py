@@ -107,11 +107,23 @@ def main():
     b = get_branch()
     desc = get_description()
     dirty = ""
+    main_branch="staging"
+
+
+    options = {"--main-branch": None}
+    parse_options(sys.argv[1:], options)
+    if (options["--main-branch"]!=None):
+        if(options["--main-branch"] == True):
+            print("--main-branch requires string argument")
+            exit(-1)
+        else:
+            main_branch = options["--main-branch"]
+            
     if (get_dirty()):
         dirty="-dirty"
     if (b == None):
         out = 'norev'
-    elif ((b != 'staging') or (len(desc) == 0)):
+    elif ((b != main_branch) or (len(desc) == 0)):
         out = b+"-"+get_revision()+dirty
     else:
         out = desc
