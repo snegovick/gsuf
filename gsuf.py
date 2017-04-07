@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import os
 import sys
 import traceback
 from subprocess import Popen, PIPE
@@ -40,13 +41,16 @@ def get_branch():
             print '-'*60
         return None
 
-def get_description():
+def get_description(with_hash):
     try:
         p = Popen(['git', 'status'], stdout=PIPE, stderr=PIPE)
         p.stderr.close()
         p.stdout.close()
 
-        command = ['git', 'describe', '--abbrev=8', '--tags', '--dirty', '--match=*']
+        if with_hash:
+            command = ['git', 'describe', '--abbrev=8', '--tags', '--dirty', '--match=*']
+        else:
+            command = ['git', 'describe', '--abbrev=0', '--tags', '--dirty', '--match=*']
         p = Popen(command, stdout=PIPE, stderr=PIPE)
         p.stderr.close()
         line = p.stdout.readline().strip()
@@ -105,12 +109,13 @@ def get_dirty():
 def main():
     out = ""
     b = get_branch()
-    desc = get_description()
     dirty = ""
-    main_branch="staging"
-
-
-    options = {"--main-branch": None}
+    main_branch = "staging"
+    add_hash = True
+    prefix = ""
+    working_dir=""
+    
+    options = {"--main-branch": None, "--no-hash": None, "--prefix": None, "--cd": None}
     parse_options(sys.argv[1:], options)
     if (options["--main-branch"]!=None):
         if(options["--main-branch"] == True):
@@ -118,15 +123,47 @@ def main():
             exit(-1)
         else:
             main_branch = options["--main-branch"]
-            
+
+    if (options["--no-hash"]!=None):
+        if(options["--no-hash"] == True):
+            add_hash = False
+
+    desc = get_description(add_hash)
+
+    if (options["--prefix"]!=None):
+        if(options["--prefix"] == True):
+            print("--prefix requires string argument")
+            exit(-1)
+        else:
+            prefix = options["--prefix"]
+
+    if (options["--cd"]!=None):
+        if(options["--cd"] == True):
+            print("--cd requires string argument")
+            exit(-1)
+        else:
+            working_dir = options["--cd"]
+
+    cwd = os.getcwd();
+    if working_dir!="":
+        if os.path.isdir(working_dir):
+            os.chdir(working_dir)
+        else:
+            exit(-2)
+
     if (get_dirty()):
         dirty="-dirty"
     if (b == None):
         out = 'norev'
     elif ((b != main_branch) or (len(desc) == 0)):
-        out = b+"-"+get_revision()+dirty
+        if add_hash:
+            out = b+"-"+get_revision()+dirty
+        else:
+            out = b+dirty
     else:
         out = desc
+    if prefix!="":
+        out=prefix+"-"+out
     return out
 
 if __name__=="__main__":
