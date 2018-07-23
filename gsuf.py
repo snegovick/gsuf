@@ -115,8 +115,14 @@ def main():
     prefix = ""
     working_dir=""
     
-    options = {"--main-branch": None, "--no-hash": None, "--prefix": None, "--cd": None}
+    options = {"--main-branch": None, "--no-hash": None, "--prefix": None, "--cd": None, "--is-dirty": None}
     parse_options(sys.argv[1:], options)
+    if (options["--is-dirty"]!=None):
+        if (get_dirty()):
+            exit(0)
+        else:
+            exit(1)
+
     if (options["--main-branch"]!=None):
         if(options["--main-branch"] == True):
             print("--main-branch requires string argument")
