@@ -108,6 +108,32 @@ def get_last_tag_rev():
             print '-'*60
         return None
 
+def get_revs_since_last_tag():
+    #git rev-list  tag..HEAD --count
+    rev = get_last_tag_rev()
+    if (rev == None):
+        return None
+    try:
+        p = Popen(['git', 'status'], stdout=PIPE, stderr=PIPE)
+        p.stderr.close()
+        p.stdout.close()
+
+        #git rev-list --tags --no-walk --max-count=1
+        command = ['git', 'rev-list', rev+"..HEAD", '--count']
+        p = Popen(command, stdout=PIPE, stderr=PIPE)
+        p.wait()
+        p.stderr.close()
+        line = p.stdout.readline().strip()
+        p.stdout.close()
+        return line
+    except:
+        if DEBUG:
+            print "Exception in user code:"
+            print '-'*60
+            traceback.print_exc(file=sys.stdout)
+            print '-'*60
+        return None    
+
 def get_dirty():
     try:
         p = Popen(['git', 'status'], stdout=PIPE, stderr=PIPE)
@@ -139,7 +165,7 @@ def main():
     prefix = ""
     working_dir=""
     
-    options = {"--main-branch": None, "--no-hash": None, "--prefix": None, "--cd": None, "--is-dirty": None, "--last-tag-rev": None}
+    options = {"--main-branch": None, "--no-hash": None, "--prefix": None, "--cd": None, "--is-dirty": None, "--last-tag-rev": None, "--revs-since-last-tag": None}
     parse_options(sys.argv[1:], options)
     if (options["--is-dirty"]!=None):
         if (get_dirty()):
@@ -149,6 +175,14 @@ def main():
 
     if (options["--last-tag-rev"]!=None):
         line = get_last_tag_rev()
+        if (line!=None):
+            print(line)
+            exit(0)
+        else:
+            exit(1)
+
+    if (options["--revs-since-last-tag"]!=None):
+        line = get_revs_since_last_tag()
         if (line!=None):
             print(line)
             exit(0)
