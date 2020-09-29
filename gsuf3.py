@@ -4,7 +4,7 @@ import os
 import sys
 import traceback
 from subprocess import Popen, PIPE
-DEBUG=False
+DEBUG=True
 
 def parse_options(argv, expected_options):
     #print "parsing options"
@@ -119,7 +119,7 @@ def get_revs_since_last_tag():
         p.stdout.close()
 
         #git rev-list --tags --no-walk --max-count=1
-        command = ['git', 'rev-list', rev+"..HEAD", '--count']
+        command = ['git', 'rev-list', str(rev)+"..HEAD", '--count']
         p = Popen(command, stdout=PIPE, stderr=PIPE)
         p.wait()
         p.stderr.close()
