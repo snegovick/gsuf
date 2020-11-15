@@ -26,7 +26,7 @@ def get_branch():
         p = Popen(['git', 'status'], stdout=PIPE, stderr=PIPE)
         p.stderr.close()
         p.stdout.close()
-        
+
         command = ['git', 'rev-parse', '--abbrev-ref', 'HEAD']
         p = Popen(command, stdout=PIPE, stderr=PIPE)
         p.stderr.close()
@@ -119,7 +119,7 @@ def get_revs_since_last_tag():
         p.stdout.close()
 
         #git rev-list --tags --no-walk --max-count=1
-        command = ['git', 'rev-list', str(rev)+"..HEAD", '--count']
+        command = ['git', 'rev-list', rev.decode()+"..HEAD", '--count']
         p = Popen(command, stdout=PIPE, stderr=PIPE)
         p.wait()
         p.stderr.close()
@@ -132,7 +132,7 @@ def get_revs_since_last_tag():
             print('-'*60)
             traceback.print_exc(file=sys.stdout)
             print('-'*60)
-        return None    
+        return None
 
 def get_dirty():
     try:
@@ -164,7 +164,7 @@ def main():
     add_hash = True
     prefix = ""
     working_dir=""
-    
+
     options = {"--main-branch": None, "--no-hash": None, "--prefix": None, "--cd": None, "--is-dirty": None, "--last-tag-rev": None, "--revs-since-last-tag": None}
     parse_options(sys.argv[1:], options)
     if (options["--is-dirty"]!=None):
